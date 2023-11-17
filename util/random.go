@@ -9,8 +9,8 @@ import (
 const (
 	alphabet    = "abcdefghijklmnopqrstuvwxyz"
 	ownerLength = 6
-	minMoney    = 0
-	maxMoney    = 1000
+	minMoney    = 100
+	maxMoney    = 5000
 )
 
 var random *rand.Rand

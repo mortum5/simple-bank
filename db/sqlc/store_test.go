@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestTransferDeadlockTx(t *testing.T) {
+func TestTransferTxDeadlock(t *testing.T) {
 	store := NewStore(testDB)
 
 	account1 := createRandomAccount(t)
@@ -54,6 +54,7 @@ func TestTransferDeadlockTx(t *testing.T) {
 		require.NoError(t, err)
 	}
 
+	// check the final updated balance
 	updatedAccount1, err := store.GetAccount(context.Background(), account1.ID)
 	require.NoError(t, err)
 
@@ -61,9 +62,8 @@ func TestTransferDeadlockTx(t *testing.T) {
 	require.NoError(t, err)
 
 	fmt.Println(">> after:", updatedAccount1.Balance, updatedAccount2.Balance)
-
-	require.Equal(t, account1.Balance-int64(n)*amount, updatedAccount1.Balance)
-	require.Equal(t, account2.Balance+int64(n)*amount, updatedAccount2.Balance)
+	require.Equal(t, account1.Balance, updatedAccount1.Balance)
+	require.Equal(t, account2.Balance, updatedAccount2.Balance)
 }
 
 func TestTranferTx(t *testing.T) {
@@ -169,4 +169,7 @@ func TestTranferTx(t *testing.T) {
 
 	require.Equal(t, account1.Balance-int64(n)*amount, updatedAccount1.Balance)
 	require.Equal(t, account2.Balance+int64(n)*amount, updatedAccount2.Balance)
+
+	require.GreaterOrEqual(t, account1.Balance, int64(0))
+	require.GreaterOrEqual(t, account2.Balance, int64(0))
 }

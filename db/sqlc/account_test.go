@@ -37,6 +37,19 @@ func TestCreateAccount(t *testing.T) {
 	createRandomAccount(t)
 }
 
+func TestAccountBalanceConstraint(t *testing.T) {
+	arg := CreateAccountParams{
+		Owner:    util.RandomOwner(),
+		Balance:  -1000,
+		Currency: "USD",
+	}
+
+	account, err := testQueries.CreateAccount(context.Background(), arg)
+
+	require.Error(t, err)
+	require.Empty(t, account)
+}
+
 func TestGetAccount(t *testing.T) {
 	account1 := createRandomAccount(t)
 	account2, err := testQueries.GetAccount(context.Background(), account1.ID)
