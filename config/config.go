@@ -8,11 +8,12 @@ import (
 
 // Struct to map env values.
 type Config struct {
-	DBUser string `mapstructure:"POSTGRES_USER"`
-	DBPass string `mapstructure:"POSTGRES_PASSWORD"`
-	DBHost string `mapstructure:"POSTGRES_HOST"`
-	DBPort int    `mapstructure:"POSTGRES_PORT"`
-	DBName string `mapstructure:"POSTGRES_DB"`
+	DBUser        string `mapstructure:"POSTGRES_USER"`
+	DBPass        string `mapstructure:"POSTGRES_PASSWORD"`
+	DBHost        string `mapstructure:"POSTGRES_HOST"`
+	DBPort        int    `mapstructure:"POSTGRES_PORT"`
+	DBName        string `mapstructure:"POSTGRES_DB"`
+	ServerAddress string `mapstructure:"SERVER_ADDRESS"`
 }
 
 // Call to get a new instance of config with .env variables.
@@ -23,6 +24,8 @@ func LoadConfig(path string) (config Config, err error) {
 	// Tell viper the name of config file.
 	viper.SetConfigName(".env")
 	viper.SetConfigType("env")
+
+	viper.AutomaticEnv()
 
 	// Viper reads all the variables.
 	if err = viper.ReadInConfig(); err != nil {

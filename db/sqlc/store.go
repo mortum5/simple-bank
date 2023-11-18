@@ -7,19 +7,24 @@ import (
 	"fmt"
 )
 
-type Store struct {
+type Store interface {
+	Querier
+	TranferTx(ctx context.Context, arg TransferTxParams) (TranferTxResult, error)
+}
+
+type SQLStore struct {
 	*Queries
 	db *sql.DB
 }
 
-func NewStore(db *sql.DB) *Store {
-	return &Store{
+func NewStore(db *sql.DB) Store {
+	return &SQLStore{
 		db:      db,
 		Queries: New(db),
 	}
 }
 
-func (store *Store) execTx(ctx context.Context, fn func(*Queries) error) error {
+func (store *SQLStore) execTx(ctx context.Context, fn func(*Queries) error) error {
 	txOptions := &sql.TxOptions{
 		ReadOnly:  false,
 		Isolation: sql.LevelReadCommitted,
@@ -84,13 +89,13 @@ func updateBalance(ctx context.Context, q *Queries, userID int64, fn ValueUpdate
 	return account, nil
 }
 
-func (store *Store) TranferTx(ctx context.Context, arg TransferTxParams) (TranferTxResult, error) {
+func (store *SQLStore) TranferTx(ctx context.Context, arg TransferTxParams) (TranferTxResult, error) {
 	var result TranferTxResult
 
 	err := store.execTx(ctx, func(q *Queries) error {
 		var err error
 
-		txName := ctx.Value(TxKey)
+		// txName := ctx.Value(TxKey)
 
 		dec := func(a int64) int64 {
 			return a - arg.Amount
@@ -101,38 +106,38 @@ func (store *Store) TranferTx(ctx context.Context, arg TransferTxParams) (Tranfe
 		}
 
 		if arg.FromAccountID < arg.ToAccountID {
-			fmt.Println(txName, "update from account")
+			// fmt.Println(txName, "update from account")
 			result.FromAccount, err = updateBalance(ctx, q, arg.FromAccountID, dec)
 			if err != nil {
 				return err
 			}
 
-			fmt.Println(txName, "update to account")
+			// fmt.Println(txName, "update to account")
 			result.ToAccount, err = updateBalance(ctx, q, arg.ToAccountID, inc)
 			if err != nil {
 				return err
 			}
 		} else {
-			fmt.Println(txName, "update to account")
+			// fmt.Println(txName, "update to account")
 			result.ToAccount, err = updateBalance(ctx, q, arg.ToAccountID, inc)
 			if err != nil {
 				return err
 			}
 
-			fmt.Println(txName, "update from account")
+			// fmt.Println(txName, "update from account")
 			result.FromAccount, err = updateBalance(ctx, q, arg.FromAccountID, dec)
 			if err != nil {
 				return err
 			}
 		}
 
-		fmt.Println(txName, "create transfer")
+		// fmt.Println(txName, "create transfer")
 		result.Transfer, err = q.CreateTransfer(ctx, CreateTransferParams(arg))
 		if err != nil {
 			return err
 		}
 
-		fmt.Println(txName, "create entry 1")
+		// fmt.Println(txName, "create entry 1")
 		result.FromEntry, err = q.CreateEntry(ctx, CreateEntryParams{
 			AccountID: arg.FromAccountID,
 			Amount:    -arg.Amount,
@@ -141,7 +146,7 @@ func (store *Store) TranferTx(ctx context.Context, arg TransferTxParams) (Tranfe
 			return err
 		}
 
-		fmt.Println(txName, "create entry 2")
+		// fmt.Println(txName, "create entry 2")
 		result.ToEntry, err = q.CreateEntry(ctx, CreateEntryParams{
 			AccountID: arg.ToAccountID,
 			Amount:    arg.Amount,

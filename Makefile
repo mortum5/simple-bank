@@ -18,13 +18,22 @@ migratedown:
 sqlc:
 	sqlc generate
 
+mock:
+	mockgen -package mockdb -destination db/mock/store.go github.com/mortum5/simple-bank/db/sqlc Store
+
+server:
+	go run main.go
+
 lint:
 	golangci-lint --color auto -v run --fix 
 
+cloc:
+	gocloc .
+	
 test:
 	go test -v -count=1 -race ./...
 
 stop:
 	docker compose down
 
-.PHONY: postgres createdb dropdb migrateup migratedown sqlc stop
+.PHONY: postgres createdb dropdb migrateup migratedown sqlc mock server lint test stop

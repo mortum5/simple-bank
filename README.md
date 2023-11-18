@@ -21,7 +21,9 @@ $> make dropdb       # drop database via dropdb command
 $> make migrateup    # run migrate up
 $> make migratedown  # run migrate down
 $> make sqlc         # generate sqlc code
+$> make mock         # generate mock code for store
 $> make test         # run tests
 $> make lint         # run linter
+$> make cloc         # show project line number
 $> make stop         # stop all containers
 ```

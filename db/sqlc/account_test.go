@@ -7,7 +7,6 @@ import (
 	"time"
 
 	. "github.com/mortum5/simple-bank/db/sqlc"
-
 	"github.com/mortum5/simple-bank/util"
 	"github.com/stretchr/testify/require"
 )
